@@ -1806,6 +1806,15 @@ egismoc_close (FpDevice *device)
 
   g_usb_device_release_interface (fpi_device_get_usb_device (device),
                                   0, 0, &error);
+
+  /*
+   * egismoc_open() unconditionally resets the USB device, which wipes the
+   * sensor's negotiated firmware state. Force the init handshake to run
+   * again on the next open instead of trusting stale state from before
+   * this close (e.g. across a suspend/resume cycle).
+   */
+  self->dev_init_done = FALSE;
+
   fpi_device_close_complete (device, error);
 }
 
